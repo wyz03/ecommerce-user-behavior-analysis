@@ -2,13 +2,13 @@
 
 ## 项目简介
 
-本项目基于阿里天池提供的淘宝用户行为数据集，使用 **MySQL（HeidiSQL）** 完成数据导入与基础指标计算，后续将利用 **Python（RFM 模型）** 和 **Power BI** 进行用户分层与可视化分析。目的是模拟电商数据分析师的工作流程，从数据清洗、指标计算到业务洞察。
+本项目基于阿里天池提供的淘宝用户行为数据集，使用 **MySQL** 完成数据导入与基础指标计算，利用 **Python** 实现 RFM 用户分层，并通过 **Power BI** 进行可视化分析。目的是模拟电商数据分析师的工作流程，从数据清洗、指标计算到业务洞察，展现数据分析全链路能力。
 
 ## 数据集
 
 - **来源**：[阿里天池 - User Behavior Data](https://tianchi.aliyun.com/dataset/649)
 - **原始规模**：约 1 亿条用户行为记录（压缩包 905MB，解压后约 3GB）
-- **抽样数据**：为便于本地分析，使用 Python 抽取前 20 万行作为样本（`UserBehavior_sample.csv`）
+- **抽样数据**：使用 Python 抽取前 20 万行作为样本（`UserBehavior_sample.csv`），便于本地分析。
 - **字段说明**：
 
 | 字段 | 类型 | 说明 |
@@ -21,78 +21,92 @@
 
 ## 数据准备（导入 MySQL）
 
-1. **下载并抽样**  
-   从天池下载 `UserBehavior.csv.zip`，解压后得到约 3GB 的 CSV 文件。  
-   使用 Python 脚本读取前 20 万行，生成 `UserBehavior_sample.csv`（约 25MB）。
-
-2. **创建数据库与表**  
-   在 MySQL（HeidiSQL）中创建数据库 `ecommerce`，并创建表 `user_behavior`，建表语句如下（也可参考 `sql/create_table.sql`）：
-
-   ```sql
-   CREATE TABLE user_behavior (
-       user_id INT,
-       item_id INT,
-       category_id INT,
-       behavior_type VARCHAR(10),
-       timestamp INT,
-       datetime DATETIME
-   );
-   ```
-
-3. **导入数据**  
-   通过 HeidiSQL 的导入向导（右键表 → 导入 → CSV 文件），选择 `UserBehavior_sample.csv`，设置字段分隔符为逗号，勾选“第一行包含字段名”，将数据导入表中。
+1. **下载并抽样**：从天池下载原始数据，使用 Python 读取前 20 万行，生成样本 CSV。
+2. **创建表**：在 MySQL 中创建 `user_behavior` 表，结构见 `sql/create_table.sql`。
+3. **导入数据**：通过 HeidiSQL 导入向导将样本数据导入 MySQL。
 
 ## SQL 分析（核心指标）
 
-所有分析查询均保存在 `sql/analysis_queries.sql` 中，主要计算以下指标：
+所有分析查询保存在 `sql/analysis_queries.sql` 中，主要计算以下指标：
 
 - **PV/UV**：总点击次数与独立访客数
 - **转化漏斗**：点击 → 加购 → 购买的独立用户数及转化率
 - **用户活跃时段分布**：按小时统计点击行为
 - **复购率**：购买次数≥2的用户占比
 
-执行示例（部分）：
+### 关键发现（基于抽样数据）
 
-```sql
--- PV/UV
-SELECT 
-    COUNT(*) AS pv,
-    COUNT(DISTINCT user_id) AS uv
-FROM user_behavior
-WHERE behavior_type = 'pv';
+| 指标 | 数值 |
+|------|------|
+| 总点击量（PV） | 179,831 次 |
+| 独立访客数（UV） | 1,967 人 |
+| 点击用户数（pv_users） | 1,967 |
+| 加购用户数（cart_users） | 1,466 |
+| 购买用户数（buy_users） | 1,369 |
+| 点击 → 加购 转化率 | 74.5% |
+| 加购 → 购买 转化率 | 93.4% |
+| 整体购买转化率（点击→购买） | 69.6% |
+| 复购率（购买≥2次用户占比） | 66.5% |
+| 用户活跃高峰时段 | 下午 13:00-14:00（16,009 次点击） |
 
--- 转化漏斗
-SELECT 
-    COUNT(DISTINCT CASE WHEN behavior_type = 'pv' THEN user_id END) AS pv_users,
-    COUNT(DISTINCT CASE WHEN behavior_type = 'cart' THEN user_id END) AS cart_users,
-    COUNT(DISTINCT CASE WHEN behavior_type = 'buy' THEN user_id END) AS buy_users
-FROM user_behavior;
-```
+**用户活跃时段分布（按小时点击量，前5名）**：
 
-详细查询请查看 `sql/analysis_queries.sql`。
+| 小时 | 点击量 |
+|------|--------|
+| 13:00 | 16,009 |
+| 14:00 | 15,145 |
+| 12:00 | 13,882 |
+| 11:00 | 11,569 |
+| 15:00 | 10,524 |
 
-## 后续计划
+> *注：活跃时段集中在 11:00-15:00，与午间及午后购物习惯吻合。*
 
-- [ ] **Python RFM 模型**：计算每个用户的最近购买时间（Recency）、购买频率（Frequency），完成用户分层（高价值用户、潜力用户等）。
-- [ ] **Power BI 可视化看板**：连接 MySQL 或读取处理后的数据，制作交互式报表，展示用户活跃趋势、转化漏斗、用户价值分布。
-- [ ] **撰写分析报告**：总结关键结论与运营建议。
+## Python RFM 用户分层
+
+使用 **RFM 模型**（Recency, Frequency）对购买用户进行分层，代码见 `python/rfm_analysis.ipynb`。
+
+### 分层规则
+- **高价值用户**：R 近（R_score≥4）且 F 高（F_score≥4）
+- **潜力用户**：R 近但 F 低
+- **流失风险用户**：R 远但 F 高
+- **一般用户**：R 远且 F 低
+
+### 分层结果（基于 1369 个购买用户）
+
+| 用户层级 | 用户数 | 占比 |
+|----------|--------|------|
+| 高价值用户 | 241 | 17.6% |
+| 潜力用户 | 389 | 28.4% |
+| 流失风险用户 | 147 | 10.7% |
+| 一般用户 | 592 | 43.2% |
+
+**业务建议**：
+- 对高价值用户提供专属优惠，维持忠诚度。
+- 对潜力用户推送个性化推荐，提升复购。
+- 对流失风险用户进行召回活动（如发放优惠券）。
+
+## 可视化看板（Power BI）
+
+> *待完成*：将使用 Power BI 连接 MySQL 或读取 RFM 结果，制作交互式看板，展示用户活跃趋势、转化漏斗、分层占比等。完成后将发布截图或链接。
 
 ## 文件结构
 
 ```
 ecommerce-user-behavior-analysis/
 ├── README.md                   # 项目说明
-├── .gitignore                  # Git 忽略文件（数据、缓存等）
+├── .gitignore                  # Git 忽略文件
 ├── sql/
 │   ├── create_table.sql        # 建表语句
 │   └── analysis_queries.sql    # SQL 分析查询
-├── python/                     # Python 分析脚本（RFM 等）
-└── powerbi/                    # Power BI 看板文件（截图或链接）
+├── python/
+│   ├── rfm_analysis.ipynb      # RFM 分析 Jupyter Notebook
+│   └── rfm_result.csv          # RFM 输出结果
+└── powerbi/                    # Power BI 看板文件（待添加）
 ```
 
 ## 环境要求
 
-- MySQL 8.0 或兼容版本
+- MySQL 8.0
 - Python 3.8+（pandas, pymysql, matplotlib）
 - Power BI Desktop
 
@@ -103,4 +117,4 @@ ecommerce-user-behavior-analysis/
 
 ---
 
-*注：本项目仍在完善中，欢迎交流。*
+*注：项目持续完善中，欢迎交流。*
