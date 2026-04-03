@@ -40,9 +40,9 @@
 |------|------|
 | 总点击量（PV） | 179,831 次 |
 | 独立访客数（UV） | 1,967 人 |
-| 点击用户数（pv_users） | 1,967 |
-| 加购用户数（cart_users） | 1,466 |
-| 购买用户数（buy_users） | 1,369 |
+| 点击用户数 | 1,967 |
+| 加购用户数 | 1,466 |
+| 购买用户数 | 1,369 |
 | 点击 → 加购 转化率 | 74.5% |
 | 加购 → 购买 转化率 | 93.4% |
 | 整体购买转化率（点击→购买） | 69.6% |
@@ -85,24 +85,29 @@
 - 对潜力用户推送个性化推荐，提升复购。
 - 对流失风险用户进行召回活动（如发放优惠券）。
 
-## 可视化看板（Power BI）
+## Power BI 可视化看板
 
-> *待完成*：将使用 Power BI 连接 MySQL 或读取 RFM 结果，制作交互式看板，展示用户活跃趋势、转化漏斗、分层占比等。完成后将发布截图或链接。
+![看板预览](powerbi/dashboard_preview.png)
+
+**核心结论**：
+- 用户活跃高峰集中在 13:00-14:00，建议在该时段推送重点商品或促销信息。
+- 点击→加购转化率 74.5%，加购→购买转化率 93.4%，整体购买转化率 69.6%。
+- 高价值用户占比 17.6%，贡献了大部分复购；潜力用户占比 28.4%，可通过优惠券刺激转化；流失风险用户占比 10.7%，需定向召回。
 
 ## 文件结构
-
-```
 ecommerce-user-behavior-analysis/
-├── README.md                   # 项目说明
-├── .gitignore                  # Git 忽略文件
+├── README.md # 项目说明
+├── .gitignore # Git 忽略文件
 ├── sql/
-│   ├── create_table.sql        # 建表语句
-│   └── analysis_queries.sql    # SQL 分析查询
+│ ├── create_table.sql # 建表语句
+│ └── analysis_queries.sql # SQL 分析查询
 ├── python/
-│   ├── rfm_analysis.ipynb      # RFM 分析 Jupyter Notebook
-│   └── rfm_result.csv          # RFM 输出结果
-└── powerbi/                    # Power BI 看板文件（待添加）
-```
+│ ├── rfm_analysis.ipynb # RFM 分析 Jupyter Notebook
+│ └── rfm_result.csv # RFM 输出结果
+└── powerbi/
+└── dashboard_preview.png # Power BI 看板截图
+
+text
 
 ## 环境要求
 
