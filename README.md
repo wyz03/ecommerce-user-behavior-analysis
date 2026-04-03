@@ -95,19 +95,19 @@
 - 高价值用户占比 17.6%，贡献了大部分复购；潜力用户占比 28.4%，可通过优惠券刺激转化；流失风险用户占比 10.7%，需定向召回。
 
 ## 文件结构
+```
 ecommerce-user-behavior-analysis/
 ├── README.md # 项目说明
 ├── .gitignore # Git 忽略文件
 ├── sql/
-│ ├── create_table.sql # 建表语句
-│ └── analysis_queries.sql # SQL 分析查询
+│   ├── create_table.sql # 建表语句
+│   └── analysis_queries.sql # SQL 分析查询
 ├── python/
-│ ├── rfm_analysis.ipynb # RFM 分析 Jupyter Notebook
-│ └── rfm_result.csv # RFM 输出结果
+│   ├── rfm_analysis.ipynb # RFM 分析 Jupyter Notebook
+│   └── rfm_result.csv # RFM 输出结果
 └── powerbi/
-└── dashboard_preview.png # Power BI 看板截图
-
-text
+    └── dashboard_preview.png # Power BI 看板截图
+```
 
 ## 环境要求
 
