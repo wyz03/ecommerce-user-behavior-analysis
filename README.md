@@ -134,6 +134,7 @@
 - 高价值用户占比 17.6%，贡献了大部分复购；潜力用户占比 28.4%，可通过优惠券刺激转化；流失风险用户占比 10.7%，需定向召回。
 
 ## 文件结构
+```
 ecommerce-user-behavior-analysis/
 ├── README.md # 项目说明
 ├── images/ # 分析图表
@@ -151,8 +152,7 @@ ecommerce-user-behavior-analysis/
 │ └── product_category_analysis.ipynb # 商品/品类分析可视化
 └── powerbi/
 └── dashboard_preview.png # Power BI 看板截图
-
-text
+```
 
 ## 环境要求
 
