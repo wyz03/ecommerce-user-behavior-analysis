@@ -19,6 +19,8 @@
 | behavior_type | VARCHAR(10) | 行为类型（pv / cart / fav / buy） |
 | timestamp | INT | 行为发生的 Unix 时间戳（秒） |
 
+- **抽样说明**：基于 20 万行抽样数据（购买记录约 4,300 条），商品购买次数绝对值较小，但相对排序和品类复购趋势具有参考价值。
+
 ## 数据准备（导入 MySQL）
 
 1. **下载并抽样**：从天池下载原始数据，使用 Python 读取前 20 万行，生成样本 CSV。
@@ -61,6 +63,43 @@
 
 > *注：活跃时段集中在 11:00-15:00，与午间及午后购物习惯吻合。*
 
+## 商品与品类分析
+
+为了深入理解用户对商品和品类的偏好，我们对抽样数据进行了商品/品类维度的分析，包括热销排行、复购率等。分析脚本见 `sql/product_category_analysis.sql` 和 `python/product_category_analysis.ipynb`。
+
+### 热门品类（点击量 & 购买量）
+
+以下图表展示了点击量和购买量最高的品类（TOP 10）。
+
+| 点击量 TOP 10 品类 | 购买量 TOP 10 品类 |
+|--------------------|--------------------|
+| ![点击量TOP10品类](images/top_categories_pv.png) | ![购买量TOP10品类](images/top_categories_buy.png) |
+
+**洞察**：
+- 高点击品类（如 `4756105`）并未进入高购买榜单，可能存在商品详情页转化率低、定价不合理或库存不足等问题。
+- 品类 `1464116` 虽然点击量未进前十，但购买量排名第一，说明该品类用户购买意愿强，转化效率高。
+
+### 热门商品（购买量 TOP 10）
+
+![购买量TOP10商品](images/top_items.png)
+
+*注：由于使用抽样数据，购买记录较少，头部商品购买次数在 3~6 次，但相对排序仍可反映商品热度。*
+
+**洞察**：头部商品购买量集中度低，用户需求分散，建议加强爆款运营或优化个性化推荐算法。
+
+### 品类复购率分析
+
+![品类复购率分析](images/category_repeat_rate.png)
+
+- **高复购品类**（复购率 > 35%）：`1216617`（45.5%）、`235534`（40.0%）、`4719814`（40.0%）——用户粘性强，适合推出会员订阅、周期购等策略。
+- **低复购品类**（复购率 < 20%）：部分品类复购率较低，用户多为一次性购买，需通过优惠券、关联推荐等方式刺激二次消费。
+
+### 业务建议
+
+1. **优化高点击低购买品类**：对点击量高但购买转化低的品类，检查商品详情页、价格竞争力、用户评价，进行 A/B 测试优化。
+2. **强化高复购品类运营**：对复购率高的品类建立会员权益体系，提升用户生命周期价值（LTV）。
+3. **挖掘潜力商品**：对购买量靠前的商品增加曝光，打造爆款；对低复购商品尝试捆绑销售或后续营销触达。
+
 ## Python RFM 用户分层
 
 使用 **RFM 模型**（Recency, Frequency）对购买用户进行分层，代码见 `python/rfm_analysis.ipynb`。
@@ -95,19 +134,25 @@
 - 高价值用户占比 17.6%，贡献了大部分复购；潜力用户占比 28.4%，可通过优惠券刺激转化；流失风险用户占比 10.7%，需定向召回。
 
 ## 文件结构
-```
 ecommerce-user-behavior-analysis/
 ├── README.md # 项目说明
-├── .gitignore # Git 忽略文件
+├── images/ # 分析图表
+│ ├── top_categories_pv.png
+│ ├── top_categories_buy.png
+│ ├── top_items.png
+│ └── category_repeat_rate.png
 ├── sql/
-│   ├── create_table.sql # 建表语句
-│   └── analysis_queries.sql # SQL 分析查询
+│ ├── create_table.sql # 建表语句
+│ ├── analysis_queries.sql # 核心指标 SQL
+│ └── product_category_analysis.sql # 商品/品类分析 SQL
 ├── python/
-│   ├── rfm_analysis.ipynb # RFM 分析 Jupyter Notebook
-│   └── rfm_result.csv # RFM 输出结果
+│ ├── rfm_analysis.ipynb # RFM 分析
+│ ├── rfm_result.csv # RFM 结果
+│ └── product_category_analysis.ipynb # 商品/品类分析可视化
 └── powerbi/
-    └── dashboard_preview.png # Power BI 看板截图
-```
+└── dashboard_preview.png # Power BI 看板截图
+
+text
 
 ## 环境要求
 
