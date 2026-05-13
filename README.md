@@ -19,7 +19,11 @@
 | behavior_type | VARCHAR(10) | 行为类型（pv / cart / fav / buy） |
 | timestamp | INT | 行为发生的 Unix 时间戳（秒） |
 
-- **抽样说明**：基于 20 万行抽样数据（购买记录约 4,300 条），商品购买次数绝对值较小，但相对排序和品类复购趋势具有参考价值。
+## 数据局限与说明
+
+- **时间分布**：数据中99%以上的用户行为集中在 **2017年11月25日至12月3日**（共9天），早期用户数量极少（仅1~2人），不具备统计意义。  
+- **留存分析**：由于大部分用户首次购买发生在11月25日之后，观察窗口仅9天，无法计算可靠的30日留存。因此本分析聚焦于**转化漏斗、用户分层、商品复购**等不受时间窗口限制的指标，确保结论可靠。
+- **抽样影响**：基于20万行抽样数据，商品绝对购买次数较小，但相对排序和趋势仍具有参考价值。
 
 ## 数据准备（导入 MySQL）
 
@@ -136,7 +140,6 @@
 ## 文件结构
 ```
 ecommerce-user-behavior-analysis/
-├── README.md # 项目说明
 ├── images/ # 分析图表
 │ ├── top_categories_pv.png
 │ ├── top_categories_buy.png
@@ -150,8 +153,9 @@ ecommerce-user-behavior-analysis/
 │ ├── rfm_analysis.ipynb # RFM 分析
 │ ├── rfm_result.csv # RFM 结果
 │ └── product_category_analysis.ipynb # 商品/品类分析可视化
-└── powerbi/
-└── dashboard_preview.png # Power BI 看板截图
+├── powerbi/
+│ └── dashboard_preview.png # Power BI 看板截图
+└── README.md # 项目说明
 ```
 
 ## 环境要求
